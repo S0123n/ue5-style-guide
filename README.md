@@ -463,10 +463,10 @@ There are multiple ways to lay out the content of a UE4 project. In this style, 
 > If you are using the prefix [naming convention](#1.2) above, using folders to contain assets of similar types such as `Meshes`, `Textures`, and `Materials` is a redundant practice as asset types are already both sorted by prefix as well as able to be filtered in the content browser.
 
 <a name="2e1"><a>
-### 2e1 Example Project Content Structure
+### 2e1 CO[0]RDINATES Example Project Content Structure
 <pre>
 |-- Content
-    |-- <a href="#2.2">GenericShooter</a>
+    |-- <a href="#2.2">Coordinates</a>
         |-- Art
         |   |-- Industrial
         |   |   |-- Ambient
@@ -479,12 +479,16 @@ There are multiple ways to lay out the content of a UE4 project. In this style, 
         |   |   |-- Trees
         |   |-- Office
         |-- Characters
-        |   |-- Bob
-        |   |-- Common
+	|   |-- Common
         |   |   |-- <a href="#2.7">Animations</a>
         |   |   |-- Audio
-        |   |-- Jack
-        |   |-- Steve
+        |   |-- Humans
+	|   |   |-- Common
+	|   |   |   |-- subfolder
+	|   |   |-- Bob
+        |   |-- Drones
+	|   |   |--Common
+	|   |   |   |-- subfolder
         |   |-- <a href="#2.1.3">Zoe</a>
         |-- <a href="#2.5">Core</a>
         |   |-- Characters
@@ -508,12 +512,6 @@ There are multiple ways to lay out the content of a UE4 project. In this style, 
         |   |-- Weathering
         |-- Placeables
         |   |-- Pickups
-        |-- Weapons
-            |-- Common
-            |-- Pistols
-            |   |-- DesertEagle
-            |   |-- RocketPistol
-            |-- Rifles
 </pre>
 
 The reasons for this structure are listed in the following sub-sections.
@@ -1073,6 +1071,10 @@ Bad examples:
 * `OnFire` - Can be confused with event dispatcher for firing.
 * `Dead` - Is dead? Will deaden?
 * `Visibility` - Is visible? Set visibility? A description of flying conditions?
+	
+@Be_1
+
+Function should be use for any repetitive code. You should not have to copy paste or create a macro.
 
 <a name="3.3.1.4"></a>
 <a name="bp-funcs-naming-eventhandlers"></a>
@@ -1166,6 +1168,14 @@ Simply, any function that has an access specificer of Public should have its des
 If your project includes a plugin that defines `static` `BlueprintCallable` functions, they should have their category set to the plugin's name or a subset category of the plugin's name.
 
 For example, `Zed Camera Interface` or `Zed Camera Interface | Image Capturing`.
+	
+<a name="3.3.6"></a>
+<a name="bp-graphs-funcs-library"></a>
+#### 3.3.6 Function used accross multiple BP should be a Function Library
+@Be_1
+	
+If you’re finding yourself using a lot of similar functions across many Blueprints in your project you should consider using a Blueprint.
+You can make as many as you like, and they provide a way to store generic functions that any of the Blueprints in your project can call (when set to 'public').
 
 <a name="3.4"></a>
 <a name="bp-graphs"></a>
@@ -1179,9 +1189,9 @@ This section covers things that apply to all Blueprint graphs.
 
 Wires should have clear beginnings and ends. You should never have to mentally untangle wires to make sense of a graph. Many of the following sections are dedicated to reducing spaghetti.
 
-<a name="3.4.2"></a>
+<a name="3.4.2.1"></a>
 <a name="bp-graphs-align-wires"></a>
-#### 3.4.2 Align Wires Not Nodes
+#### 3.4.2.1 Align Wires Not Nodes
 
 Always align wires, not nodes. You can't always control the size and pin location on a node, but you can always control the location of a node and thus control the wires. Straight wires provide clear linear flow. Wiggly wires wear wits wickedly. You can straighten wires by using the Straighten Connections command with BP nodes selected. Hotkey: Q
 
@@ -1193,6 +1203,24 @@ Bad Example: The tops of the nodes are aligned creating a wiggly white exec line
 
 Acceptable Example: Certain nodes might not cooperate no matter how you use the alignment tools. In this situation, try to minimize the wiggle by bringing the node in closer.
 ![Acceptable](https://github.com/allar/ue4-style-guide/raw/master/images/bp-graphs-align-wires-acceptable.png "Acceptable")
+	
+<a name="3.4.2.2"></a>
+<a name="bp-graphs-tidy-nodes"></a>
+#### 3.4.2.2 Nodes tidy by execution priority
+@Be_1
+
+Nodes and group of nodes must be align so the first node to execute (after the construction script) is on top-left of the graph. Most of the time this first node will be an Event node.
+Each execution flow must go from left to right. Each new execution flow must be placed under the previous one.
+	
+There are two types of Event nodes:
+	- Auto trigger
+	- Trigger
+Auto trigger Event nodes concern all those who start without player input. Events like: BeginPlay ; Tick ; OnComponentBeginOverlap ; AnyDamage. These must follow the rule of having the first node to trigger at the top (generally BeginPlay if there is one).
+
+Trigger Event nodes are those who are trigger by CustomEvent ; PlayerInput ; EventDispatcher ; Interface of any sort. There are no particular vertical order for these nodes execution.
+	
+Auto trigger nodes must be placed above Trigger nodes.
+![Good](https://github.com/S0123n/ue5-style-guide/blob/main/images/bp-graphs-tidy-nodes_Good.png "Tidy by groups")
 
 <a name="3.4.3"></a>
 <a name="bp-graphs-exec-first-class"></a>
